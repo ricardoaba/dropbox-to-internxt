@@ -1,0 +1,30 @@
+# Internxt WebDAV en Docker
+# Imagen oficial de la CLI de Internxt (https://github.com/internxt/cli/tree/main/docker)
+# Variables leídas de ./.env (copia .env.example a .env y rellénalo).
+services:
+  internxt-webdav:
+    image: internxt/webdav:latest
+    container_name: internxt-webdav
+    restart: unless-stopped
+    environment:
+      INXT_USER: "${INXT_USER}"                 # Email de la cuenta Internxt (plan Ultimate)
+      INXT_PASSWORD: "${INXT_PASSWORD}"         # Contraseña de la cuenta
+      INXT_TWOFACTORCODE: "${INXT_TWOFACTORCODE:-}" # Código 2FA de un solo uso (opcional)
+      INXT_OTPTOKEN: "${INXT_OTPTOKEN:-}"       # Secreto TOTP para generar códigos 2FA (opcional, preferible)
+      WEBDAV_PORT: "${WEBDAV_PORT:-3005}"
+      WEBDAV_PROTOCOL: "${WEBDAV_PROTOCOL:-http}"   # http (solo acceso local) o https (certificado autofirmado)
+      WEBDAV_CUSTOM_AUTH: "${WEBDAV_CUSTOM_AUTH:-true}"
+      WEBDAV_USERNAME: "${WEBDAV_USERNAME:-}"   # Usuario Basic Auth del WebDAV (si CUSTOM_AUTH=true)
+      WEBDAV_PASSWORD: "${WEBDAV_PASSWORD:-}"   # Contraseña Basic Auth del WebDAV
+      WEBDAV_DELETE_FILES_PERMANENTLY: "${WEBDAV_DELETE_FILES_PERMANENTLY:-false}"
+      WEBDAV_KEEPALIVE_ENABLED: "${WEBDAV_KEEPALIVE_ENABLED:-true}"
+      INXT_SQLITE_JOURNAL_MODE: "${INXT_SQLITE_JOURNAL_MODE:-WAL}"
+    ports:
+      # Solo expuesto en localhost. Si lo abres a la red usa https y CUSTOM_AUTH.
+      - "127.0.0.1:${WEBDAV_PORT:-3005}:${WEBDAV_PORT:-3005}"
+    volumes:
+      # Persiste la sesión y la caché SQLite de la CLI entre reinicios.
+      - internxt-cli-data:/root/.internxt-cli
+
+volumes:
+  internxt-cli-data:
