@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Ejecuta un lote de migración cada hora. Instalación:
+         cp launchd/com.internxt.dropbox2internxt.plist ~/Library/LaunchAgents/
+         launchctl load ~/Library/LaunchAgents/com.internxt.dropbox2internxt.plist
+         Ajusta ProgramArguments a la ruta real de este repositorio. -->
+    <key>Label</key>
+    <string>com.internxt.dropbox2internxt</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/zsh</string>
+        <string>/ruta/a/dropbox-to-internxt/scripts/migrar-lote.sh</string>
+    </array>
+
+    <!-- Cada 3600 s. Alternativa: StartCalendarInterval con Hour/Minute. -->
+    <key>StartInterval</key>
+    <integer>3600</integer>
+
+    <!-- No arrancar justo al cargar; esperar al primer intervalo. -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/ruta/a/dropbox-to-internxt/migracion/log/launchd.out</string>
+    <key>StandardErrorPath</key>
+    <string>/ruta/a/dropbox-to-internxt/migracion/log/launchd.err</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/go/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+</dict>
+</plist>

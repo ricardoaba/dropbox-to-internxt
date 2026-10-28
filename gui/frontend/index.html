@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dropbox a Internxt</title>
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-title">Dropbox → Internxt</span>
+        <span class="brand-sub">migración gradual y verificada</span>
+      </div>
+      <div class="conn">
+        <span id="conn-pill" class="pill pill-muted">sin comprobar</span>
+        <button id="btn-test" class="btn">Probar conexión</button>
+        <button id="btn-docker-up" class="btn">Arrancar WebDAV</button>
+        <button id="btn-docker-down" class="btn btn-quiet">Parar</button>
+      </div>
+    </header>
+    <div id="statusbar" class="statusbar hidden"></div>
+
+    <main class="layout">
+      <!-- Columna izquierda: configuración -->
+      <aside class="panel config">
+        <h2>Configuración</h2>
+
+        <label>Carpeta de Dropbox
+          <div class="row">
+            <input id="cfg-source" type="text" />
+            <button id="btn-choose-source" class="btn btn-small">Elegir…</button>
+          </div>
+        </label>
+
+        <label>Carpeta destino en Internxt
+          <input id="cfg-remote" type="text" placeholder="/Dropbox" />
+        </label>
+
+        <h3>WebDAV</h3>
+        <label>URL <input id="cfg-url" type="text" placeholder="http://127.0.0.1:3005" /></label>
+        <div class="row two">
+          <label>Usuario <input id="cfg-user" type="text" /></label>
+          <label>Contraseña <input id="cfg-pass" type="password" /></label>
+        </div>
+        <label class="check"><input id="cfg-insecure" type="checkbox" /> Aceptar certificado autofirmado (https)</label>
+
+        <h3>Lotes</h3>
+        <div class="row two">
+          <label>Ficheros por lote <input id="cfg-batch-files" type="number" min="0" /></label>
+          <label>MB por lote <input id="cfg-batch-mb" type="number" min="0" /></label>
+        </div>
+        <div class="row two">
+          <label>Verificación
+            <select id="cfg-verify">
+              <option value="hash">tamaño + hash (descarga)</option>
+              <option value="size">solo tamaño</option>
+            </select>
+          </label>
+          <label>En paralelo <input id="cfg-parallel" type="number" min="1" max="8" /></label>
+        </div>
+        <div class="row two">
+          <label>Reintentos <input id="cfg-retries" type="number" min="0" /></label>
+          <label>Máx. GB por fichero <input id="cfg-maxgb" type="number" min="0" /></label>
+        </div>
+        <label>Aparcar tras N lotes fallidos seguidos (0 = nunca)
+          <input id="cfg-quarantine" type="number" min="0" />
+        </label>
+        <p class="hint">Un fichero que falla con el mismo error lote tras lote deja de reintentarse (y de descargarse) hasta que pulses "Reintentar aparcados".</p>
+        <label>Exclusiones (una por línea, glob)
+          <textarea id="cfg-excludes" rows="3" placeholder="Fotos/RAW&#10;*.dmg"></textarea>
+        </label>
+        <p class="hint">Sin "/" inicial, el patrón se aplica al nombre en cualquier carpeta; con "/" inicial, a la ruta exacta. El botón "saltar" de las tablas añade aquí la ruta exacta del fichero.</p>
+        <div class="row">
+          <button id="btn-excludes" class="btn btn-small" title="Ver qué deja fuera cada exclusión, quitar las que sobran y probar patrones nuevos">Gestionar exclusiones…</button>
+        </div>
+
+        <h3>Programación</h3>
+        <label>Un lote cada N minutos (0 = desactivado)
+          <input id="cfg-schedule" type="number" min="0" />
+        </label>
+        <p class="hint">Solo mientras la aplicación esté abierta.</p>
+
+        <h3>Dropbox: ficheros "solo online"</h3>
+        <p class="hint">Los ficheros no descargados son marcadores de 0 bytes. Con la cuenta de Dropbox conectada, la app los descarga de la nube a un temporal, los sube a Internxt y borra el temporal.</p>
+        <label>App key de tu aplicación de Dropbox <input id="cfg-dbx-key" type="text" autocomplete="off" /></label>
+        <div class="row">
+          <button id="btn-dbx-connect" class="btn btn-small">Conectar con Dropbox</button>
+          <button id="btn-dbx-disconnect" class="btn btn-small btn-quiet">Desconectar</button>
+          <span id="dbx-status" class="hint">sin conectar</span>
+        </div>
+        <label class="check"><input id="cfg-fetch-online" type="checkbox" /> Descargar de la nube los ficheros "solo online"</label>
+        <p class="hint">Crea la app en dropbox.com/developers/apps (Scoped access, Full Dropbox), con permisos <code>files.metadata.read</code> y <code>files.content.read</code>, y registra como Redirect URI: <code id="dbx-redirect"></code></p>
+
+        <h3>Cuenta Internxt (para el contenedor)</h3>
+        <label>Email de Internxt <input id="cfg-inxt-user" type="text" autocomplete="off" /></label>
+        <label>Contraseña de Internxt <input id="cfg-inxt-pass" type="password" autocomplete="off" /></label>
+        <label>Secreto TOTP (si tienes 2FA) <input id="cfg-inxt-otp" type="password" autocomplete="off" /></label>
+        <p class="hint">Al pulsar "Arrancar WebDAV" se escriben en el .env de la carpeta de Docker.</p>
+
+        <h3>Docker</h3>
+        <label>Carpeta con docker-compose.yml
+          <div class="row">
+            <input id="cfg-compose" type="text" />
+            <button id="btn-choose-compose" class="btn btn-small">Elegir…</button>
+          </div>
+        </label>
+
+        <div class="row end">
+          <span id="cfg-msg" class="msg"></span>
+          <button id="btn-save" class="btn btn-primary">Guardar</button>
+        </div>
+      </aside>
+
+      <!-- Columna derecha: estado y acciones -->
+      <section class="content">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Estado</h2>
+            <span id="scanned-at" class="hint"></span>
+          </div>
+          <div class="status-row">
+          <div class="tiles">
+            <div class="tile"><span class="tile-label">Origen</span><span id="t-total" class="tile-value">–</span><span id="t-total-b" class="tile-sub"></span></div>
+            <div class="tile tile-ok"><span class="tile-label">Migrados</span><span id="t-done" class="tile-value">–</span><span id="t-done-b" class="tile-sub"></span></div>
+            <div class="tile tile-warn"><span class="tile-label">Pendientes</span><span id="t-pending" class="tile-value">–</span><span id="t-pending-b" class="tile-sub"></span></div>
+            <div id="tile-skipped" class="tile tile-click" title="Gestionar exclusiones" role="button" tabindex="0"><span class="tile-label">Excluidos</span><span id="t-skipped" class="tile-value">–</span><span id="t-skipped-b" class="tile-sub"></span></div>
+          </div>
+          <div class="pie-box">
+            <svg id="pie" viewBox="0 0 100 100" width="132" height="132" role="img" aria-label="Estado de la migración">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--tile)" stroke-width="16"></circle>
+              <g id="pie-segments"></g>
+              <text id="pie-center" x="50" y="50" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="600" fill="currentColor">–</text>
+              <text id="pie-center-sub" x="50" y="63" text-anchor="middle" font-size="7" fill="var(--muted)"></text>
+            </svg>
+            <div class="pie-side">
+              <div class="pie-toggle">
+                <button id="pie-files" class="btn btn-small pie-on" title="Toda la migración, por ficheros">todo</button>
+                <button id="pie-batch" class="btn btn-small" title="Evolución del lote en curso">lote</button>
+              </div>
+              <ul id="pie-legend" class="pie-legend"></ul>
+              <div id="pie-hint" class="pie-hint hidden"></div>
+            </div>
+          </div>
+          </div>
+          <div class="progress"><div id="progress-bar" class="progress-bar" style="width:0%"></div></div>
+          <div class="row between">
+            <span id="progress-text" class="hint">Pulsa Escanear para comparar Dropbox con el diario.</span>
+            <span id="too-large" class="hint warn"></span>
+          </div>
+          <div id="placeholders-note" class="hint hidden"></div>
+          <details id="quarantine-note" class="hint warn hidden">
+            <summary id="quarantine-summary"></summary>
+            <ul id="quarantine-list" class="quarantine-list"></ul>
+          </details>
+          <div id="file-progress" class="file-progress hidden">
+            <div class="row between">
+              <span id="file-progress-text" class="hint"></span>
+              <span id="file-progress-pct" class="hint"></span>
+            </div>
+            <div class="progress small"><div id="file-progress-bar" class="progress-bar accent" style="width:0%"></div></div>
+          </div>
+          <div class="actions">
+            <button id="btn-scan" class="btn">Escanear</button>
+            <button id="btn-preview" class="btn">Ver lote</button>
+            <button id="btn-run" class="btn btn-primary">Migrar lote</button>
+            <button id="btn-run-all" class="btn btn-primary" title="Encadena lotes hasta terminar; se detiene con Detener o si un lote falla">Migrar todo</button>
+            <button id="btn-retry-quarantined" class="btn hidden" title="Vuelve a intentar una vez los ficheros aparcados">Reintentar aparcados</button>
+            <button id="btn-verify" class="btn">Verificar</button>
+            <label class="check inline"><input id="verify-hash" type="checkbox" /> con hash</label>
+            <button id="btn-stop" class="btn btn-danger" disabled>Detener</button>
+            <button id="btn-stop-after" class="btn hidden" title="Termina el lote en curso y no encadena otro: así puedes cerrar la app o reiniciar el Mac sin perder trabajo a medias">Parar al acabar el lote</button>
+            <span id="busy" class="pill pill-muted hidden"></span>
+          </div>
+        </div>
+
+        <div class="panel grow">
+          <div class="tabs">
+            <button class="tab active" data-tab="batch">Lote</button>
+            <button class="tab" data-tab="log">Registro</button>
+            <button class="tab" data-tab="failed">Fallos <span id="failed-count" class="badge hidden">0</span></button>
+          </div>
+          <div id="tab-batch" class="tab-body">
+            <div id="batch-head" class="hint">Sin lote cargado.</div>
+            <table class="table">
+              <thead><tr><th>Estado</th><th>Tamaño</th><th>Fichero</th><th>Detalle</th><th></th></tr></thead>
+              <tbody id="batch-rows"></tbody>
+            </table>
+          </div>
+          <div id="tab-log" class="tab-body hidden">
+            <ul id="log" class="log"></ul>
+          </div>
+          <div id="tab-failed" class="tab-body hidden">
+            <div class="row between">
+              <span class="hint">Los fallos se reintentan automáticamente en el siguiente lote.</span>
+              <button id="btn-refresh-failed" class="btn btn-small">Actualizar</button>
+            </div>
+            <table class="table">
+              <thead><tr><th>Fecha</th><th>Tamaño</th><th>Fichero</th><th>Error</th><th></th></tr></thead>
+              <tbody id="failed-rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Gestión de exclusiones -->
+  <dialog id="excl-modal" class="modal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div>
+          <h2>Exclusiones</h2>
+          <span id="excl-summary" class="hint">Calculando el efecto de cada exclusión…</span>
+        </div>
+        <button id="excl-close" class="btn btn-quiet" title="Cerrar sin guardar">✕</button>
+      </div>
+
+      <div class="row excl-toolbar">
+        <input id="excl-filter" type="text" placeholder="Filtrar por patrón o ruta…" />
+        <select id="excl-kind">
+          <option value="">todos los tipos</option>
+          <option value="fichero">ficheros (botón «saltar»)</option>
+          <option value="carpeta">carpetas</option>
+          <option value="nombre">nombres</option>
+          <option value="patrón">patrones con comodines</option>
+        </select>
+        <button id="excl-drop-useless" class="btn btn-small" title="Exclusiones que hoy no dejan fuera ningún fichero: rutas que ya no existen en Dropbox o patrones sin coincidencias">Quitar sin efecto</button>
+        <button id="excl-drop-all" class="btn btn-small btn-quiet" title="Quita todas las exclusiones de la lista; se aplica al guardar">Quitar todas</button>
+      </div>
+
+      <div class="excl-table-wrap">
+        <table class="table excl-table">
+          <thead><tr><th>Tipo</th><th>Patrón o ruta</th><th class="num">Deja fuera</th><th>Diario</th><th></th></tr></thead>
+          <tbody id="excl-rows"></tbody>
+        </table>
+        <div id="excl-empty" class="hint hidden">No hay exclusiones configuradas.</div>
+      </div>
+
+      <div class="excl-add">
+        <div class="row">
+          <input id="excl-new" type="text" placeholder="Nuevo patrón: *.dmg · Fotos/RAW · /Ruta/exacta/fichero.mov" />
+          <button id="excl-test" class="btn btn-small">Probar</button>
+          <button id="excl-addbtn" class="btn btn-small btn-primary">Añadir</button>
+        </div>
+        <div id="excl-preview" class="hint"></div>
+      </div>
+
+      <details class="hint">
+        <summary>Exclusiones integradas, siempre activas</summary>
+        <code id="excl-defaults"></code>
+      </details>
+
+      <div class="modal-foot">
+        <span id="excl-msg" class="msg"></span>
+        <button id="excl-cancel" class="btn">Cancelar</button>
+        <button id="excl-save" class="btn btn-primary" disabled>Guardar</button>
+      </div>
+    </div>
+  </dialog>
+  <script src="./src/main.ts" type="module"></script>
+</body>
+</html>
