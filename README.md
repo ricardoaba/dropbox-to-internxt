@@ -82,8 +82,10 @@ Internxt, porque su WebDAV no permite fijarlas.
   ese plan.
 - Un motor de Docker: Docker Desktop, OrbStack o Colima. La app arranca el que
   encuentre.
-- Para compilar: Go 1.26 o superior, Node con npm y la CLI de Wails v2
-  (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`).
+- Para compilar: las Xcode Command Line Tools (`xcode-select --install`),
+  Go 1.26 o superior, Node con npm y la CLI de Wails v2
+  (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`; comprueba el
+  entorno con `wails doctor`). La CLI `dropbox2internxt` solo necesita Go.
 - Opcional, para los ficheros "solo online": una app propia en Dropbox
   (gratuita, se crea en un minuto; ver más abajo).
 
