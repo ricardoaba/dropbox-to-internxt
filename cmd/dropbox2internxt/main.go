@@ -36,6 +36,7 @@ Uso:
   dropbox2internxt status [opciones]
   dropbox2internxt run    [opciones]
   dropbox2internxt verify [opciones]
+  dropbox2internxt dropbox-login -app-key KEY
 
 Opciones comunes:
   -src DIR        carpeta local de Dropbox (por defecto ~/Dropbox o ~/Library/CloudStorage/Dropbox)
@@ -43,6 +44,10 @@ Opciones comunes:
   -state FICHERO  diario de migración (por defecto ./migracion/diario.jsonl)
   -exclude PATRON patrón glob adicional a excluir; repetible
   -max-file SIZE  tamaño máximo por fichero (por defecto 100G, límite del WebDAV de Internxt)
+  -quarantine N   aparcar un fichero tras N lotes fallidos seguidos con el mismo error (por defecto 3; 0 = nunca)
+
+Opciones de status:
+  -failed         listar los ficheros con fallo registrado en el diario
 
 Opciones de run:
   -batch-files N  ficheros por lote (por defecto 200; 0 = sin límite)
@@ -52,6 +57,7 @@ Opciones de run:
   -retries N      reintentos por fichero (por defecto 3)
   -yes            no pedir confirmación (para ejecuciones programadas)
   -dry-run        mostrar el lote sin subir nada
+  -retry-quarantined  el lote son solo los ficheros aparcados; si vuelven a fallar, siguen aparcados
 
 Opciones de verify:
   -hash           descargar y comparar SHA-256 además del tamaño
