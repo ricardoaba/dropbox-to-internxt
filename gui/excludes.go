@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"INTERNXT/migrate"
+	"github.com/ricardoaba/dropbox-to-internxt/migrate"
 )
 
 // ExcludeRow describe una exclusión configurada, con su efecto sobre la

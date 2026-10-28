@@ -8,7 +8,7 @@ import (
 	"path"
 	"strings"
 
-	"INTERNXT/migrate"
+	"github.com/ricardoaba/dropbox-to-internxt/migrate"
 )
 
 var _ migrate.Fetcher = (*Fetcher)(nil)

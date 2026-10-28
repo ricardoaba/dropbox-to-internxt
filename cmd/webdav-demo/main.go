@@ -27,7 +27,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"INTERNXT/webdav"
+	"github.com/ricardoaba/dropbox-to-internxt/webdav"
 )
 
 func main() {

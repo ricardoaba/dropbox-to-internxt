@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"INTERNXT/webdav"
+	"github.com/ricardoaba/dropbox-to-internxt/webdav"
 )
 
 // Modos de verificación tras cada subida.

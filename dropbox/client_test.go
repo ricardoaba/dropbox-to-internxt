@@ -1,7 +1,6 @@
 package dropbox
 
 import (
-	"INTERNXT/migrate"
 	"bytes"
 	"context"
 	"crypto/rand"
@@ -10,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ricardoaba/dropbox-to-internxt/migrate"
 	"net/http"
 	"net/http/httptest"
 	"os"

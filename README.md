@@ -84,7 +84,7 @@ El análisis completo de las opciones (SDK, CLI, rclone, S3) está en
 ## Usar el cliente en tu propia aplicación
 
 ```go
-import "INTERNXT/webdav"
+import "github.com/ricardoaba/dropbox-to-internxt/webdav"
 
 c, err := webdav.New("http://127.0.0.1:3005",
     webdav.WithBasicAuth("webdav", "contraseña"))

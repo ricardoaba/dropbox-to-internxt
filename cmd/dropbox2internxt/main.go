@@ -25,9 +25,9 @@ import (
 	"syscall"
 	"time"
 
-	"INTERNXT/dropbox"
-	"INTERNXT/migrate"
-	"INTERNXT/webdav"
+	"github.com/ricardoaba/dropbox-to-internxt/dropbox"
+	"github.com/ricardoaba/dropbox-to-internxt/migrate"
+	"github.com/ricardoaba/dropbox-to-internxt/webdav"
 )
 
 const usage = `dropbox2internxt: migración gradual de Dropbox a Internxt

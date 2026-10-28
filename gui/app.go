@@ -16,9 +16,9 @@ import (
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"INTERNXT/dropbox"
-	"INTERNXT/migrate"
-	"INTERNXT/webdav"
+	"github.com/ricardoaba/dropbox-to-internxt/dropbox"
+	"github.com/ricardoaba/dropbox-to-internxt/migrate"
+	"github.com/ricardoaba/dropbox-to-internxt/webdav"
 )
 
 // Config es la configuración persistente de la aplicación.

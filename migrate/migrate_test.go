@@ -24,7 +24,7 @@ import (
 
 	"golang.org/x/net/webdav"
 
-	inxt "INTERNXT/webdav"
+	inxt "github.com/ricardoaba/dropbox-to-internxt/webdav"
 )
 
 // newTestServer levanta un WebDAV en memoria con Basic Auth.

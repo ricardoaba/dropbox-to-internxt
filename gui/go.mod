@@ -1,13 +1,13 @@
-module internxt-gui
+module github.com/ricardoaba/dropbox-to-internxt/gui
 
 go 1.26.0
 
 require (
-	INTERNXT v0.0.0
+	github.com/ricardoaba/dropbox-to-internxt v0.0.0
 	github.com/wailsapp/wails/v2 v2.12.0
 )
 
-replace INTERNXT => ../
+replace github.com/ricardoaba/dropbox-to-internxt => ../
 
 require (
 	git.sr.ht/~jackmordaunt/go-toast/v2 v2.0.3 // indirect
