@@ -405,3 +405,7 @@ El cliente Go y la demo se han probado contra un servidor WebDAV local con Basic
 Auth (subida, descarga, verificación, borrado y rechazo con credenciales
 erróneas). La prueba contra el contenedor real de Internxt requiere tus credenciales
 y Docker en marcha: es el primer paso pendiente tras rellenar `.env`.
+
+## Licencia
+
+MIT. Ver [LICENSE](LICENSE).
